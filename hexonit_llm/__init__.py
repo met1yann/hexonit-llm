@@ -41,7 +41,7 @@ from typing import Any, Optional
 from hexonit_llm.orchestrator import Orchestrator
 
 # ── Package metadata ─────────────────────────────────────────
-__version__ = "0.0.2"
+__version__ = "0.1.0"
 __author__ = "Hexonithy Studios"
 __all__ = ["UltraInference"]
 
@@ -192,6 +192,88 @@ class UltraInference:
             Generated text.
         """
         return self._orchestrator.generate(prompt, **sampling_kwargs)
+
+    # ── Pre-download VRAM check ────────────────────────────────
+
+    @classmethod
+    def check(cls, model_name: str) -> "QuantizationAdvice":
+        """
+        Static check — no model loading required.
+
+        Analyze whether your hardware can run a model BEFORE downloading it.
+
+        Usage:
+            from hexonit_llm import UltraInference
+            print(UltraInference.check("meta-llama/Meta-Llama-3-70B-Instruct"))
+        """
+        from hexonit_llm.utils.quantization_advisor import advise
+        from hexonit_llm.utils.hardware_detector import detect_hardware
+        hw = detect_hardware()
+        return advise(model_name, hw.total_vram_gb)
+
+    def can_run(self, model_name: str | None = None) -> "QuantizationAdvice":
+        """
+        Check if a model can run on current hardware BEFORE downloading.
+
+        Args:
+            model_name: Optional model to check. Defaults to the configured model.
+
+        Returns:
+            QuantizationAdvice with VRAM estimate and recommendation.
+        """
+        from hexonit_llm.utils.quantization_advisor import advise
+        target = model_name or self._orchestrator.model
+        return advise(target, self._orchestrator.hw.total_vram_gb)
+
+    # ── Benchmark ──────────────────────────────────────────────
+
+    def benchmark(self, prompt: str = "Explain quantum computing in simple terms.", runs: int = 5) -> dict:
+        """
+        Run a benchmark and return tokens/sec statistics.
+
+        Args:
+            prompt: Input text for benchmarking.
+            runs: Number of inference runs to average.
+
+        Returns:
+            dict with keys: engine, model, runs, mean_tokens_per_sec,
+                            min_tokens_per_sec, max_tokens_per_sec, total_tokens
+        """
+        import time
+        import statistics
+
+        results = []
+        total_tokens = 0
+
+        print(f"[Hexonithy Studios] Benchmarking {self.engine_name} with {runs} runs...")
+
+        for i in range(runs):
+            start = time.perf_counter()
+            response = self.generate(prompt, max_tokens=200)
+            elapsed = time.perf_counter() - start
+
+            # Approximate token count (words * 1.3 is a rough heuristic)
+            token_count = len(response.split()) * 1.3
+            tokens_per_sec = token_count / elapsed if elapsed > 0 else 0
+            results.append(tokens_per_sec)
+            total_tokens += token_count
+            print(f"  Run {i+1}/{runs}: {tokens_per_sec:.1f} tok/s")
+
+        stats = {
+            "engine": self.engine_name,
+            "model": self._orchestrator.model,
+            "draft_model": self.draft_model,
+            "runs": runs,
+            "mean_tokens_per_sec": round(statistics.mean(results), 2),
+            "median_tokens_per_sec": round(statistics.median(results), 2),
+            "min_tokens_per_sec": round(min(results), 2),
+            "max_tokens_per_sec": round(max(results), 2),
+            "stdev": round(statistics.stdev(results) if runs > 1 else 0, 2),
+            "total_tokens": round(total_tokens),
+        }
+
+        print(f"\n[Hexonithy Studios] Results: {stats['mean_tokens_per_sec']} tok/s average ({stats['engine']})")
+        return stats
 
     def generate_batch(
         self,
