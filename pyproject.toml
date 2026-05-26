@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=64.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hexonit-llm"
+version = "0.0.1"
+description = "Ultra-fast local LLM inference with zero-config hardware-optimized speculative decoding."
+authors = [
+    { name = "Hexonithy Studios", email = "hexonithy@example.com" }
+]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["llm", "inference", "speculative-decoding", "vllm", "llamacpp", "ai"]
+
+dependencies = [
+    "torch>=2.0.0",
+    "psutil>=5.9.0",
+    "huggingface_hub>=0.20.0",
+    "sentencepiece>=0.1.99",
+    "transformers>=4.36.0",
+]
+
+[project.optional-dependencies]
+vllm = ["vllm>=0.4.0"]
+llamacpp = ["llama-cpp-python>=0.2.0"]
+cloud = ["httpx>=0.27.0"]
+dev = ["pytest>=7.0", "ruff>=0.1.0"]
+
+[project.urls]
+Homepage = "https://github.com/met1yann/hexonit-llm"
+Source = "https://github.com/met1yann/hexonit-llm"
+
+[tool.setuptools.packages.find]
+include = ["hexonit_llm*"]
+
+[tool.setuptools.package-data]
+hexonit_llm = ["py.typed"]
