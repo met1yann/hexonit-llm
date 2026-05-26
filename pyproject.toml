@@ -4,15 +4,24 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hexonit-llm"
-version = "0.0.1"
+version = "0.0.2"
 description = "Ultra-fast local LLM inference with zero-config hardware-optimized speculative decoding."
 authors = [
-    { name = "Hexonithy Studios", email = "hexonithy@example.com" }
+    { name = "Hexonithy Studios", email = "metesezer54@gmail.com" }
 ]
-license = { text = "MIT" }
+license = { text = "AGPL-3.0-only" }
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = ["llm", "inference", "speculative-decoding", "vllm", "llamacpp", "ai"]
+
+classifiers = [
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
 
 dependencies = [
     "torch>=2.0.0",

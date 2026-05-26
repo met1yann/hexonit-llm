@@ -41,7 +41,7 @@ from typing import Any, Optional
 from hexonit_llm.orchestrator import Orchestrator
 
 # ── Package metadata ─────────────────────────────────────────
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __author__ = "Hexonithy Studios"
 __all__ = ["UltraInference"]
 
